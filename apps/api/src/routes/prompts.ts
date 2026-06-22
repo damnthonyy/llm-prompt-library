@@ -1,6 +1,11 @@
 import { Router } from 'express';
-import type { Prompt as PrismaPrompt } from '@prisma/client';
-import { createPromptInputSchema, updatePromptInputSchema } from '@repo/shared';
+import { Prisma, type Prompt as PrismaPrompt } from '@prisma/client';
+import {
+  createPromptInputSchema,
+  listPromptsQuerySchema,
+  updatePromptInputSchema,
+} from '@repo/shared';
+import type { PromptsPage } from '@repo/shared';
 import { prisma } from '../lib/prisma.js';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { HttpError } from '../lib/httpError.js';
@@ -22,12 +27,45 @@ async function loadOwnedPrompt(id: string, userId: string): Promise<PrismaPrompt
   return prompt;
 }
 
-// GET /prompts — list all prompts (public). Search/pagination added in #7.
+// GET /prompts — list with optional search (?q=), tag filter (?tag=), and
+// pagination (?page=&limit=). Public. Returns a Paginated<Prompt> envelope.
 promptsRouter.get(
   '/',
-  asyncHandler(async (_req, res) => {
-    const prompts = await prisma.prompt.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json(prompts.map(serializePrompt));
+  asyncHandler(async (req, res) => {
+    const { q, tag, page, limit } = listPromptsQuerySchema.parse(req.query);
+
+    const where: Prisma.PromptWhereInput = {};
+    // SQLite `contains` compiles to LIKE, which is ASCII case-insensitive.
+    if (q) {
+      where.OR = [{ title: { contains: q } }, { body: { contains: q } }];
+    }
+    // Tags are a JSON string (e.g. ["a","b"]); match the quoted tag so "code"
+    // doesn't match "coding".
+    if (tag) {
+      where.tags = { contains: JSON.stringify(tag) };
+    }
+
+    const [total, rows] = await prisma.$transaction([
+      prisma.prompt.count({ where }),
+      prisma.prompt.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    const body: PromptsPage = {
+      data: rows.map(serializePrompt),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+        hasNextPage: page * limit < total,
+      },
+    };
+    res.json(body);
   }),
 );
 
