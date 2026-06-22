@@ -1,0 +1,36 @@
+// Prisma schema for the LLM Prompt Library.
+// SQLite for zero-setup local dev; the models are portable to Postgres by
+// swapping the datasource provider (tags would then become String[]).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  prompts Prompt[]
+}
+
+model Prompt {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  /// JSON-encoded string[] of tags (SQLite has no native array type).
+  tags      String   @default("[]")
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([createdAt])
+}

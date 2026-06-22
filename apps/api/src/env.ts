@@ -10,6 +10,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   /** Origin allowed by CORS (the web client). */
   WEB_ORIGIN: z.string().url().default('http://localhost:5173'),
+  /** Prisma datasource URL (SQLite file path, resolved from the schema dir). */
+  DATABASE_URL: z.string().default('file:./dev.db'),
 });
 
 const parsed = envSchema.safeParse(process.env);
