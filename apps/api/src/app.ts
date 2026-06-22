@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { env } from './env.js';
 import { healthRouter } from './routes/health.js';
+import { authRouter } from './routes/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 /**
@@ -22,8 +23,9 @@ export function createApp(): Express {
   app.use(cookieParser());
 
   app.use('/health', healthRouter);
+  app.use('/auth', authRouter);
 
-  // Routers for auth and prompts are mounted in later issues.
+  // The prompts router is mounted in a later issue.
 
   app.use(notFoundHandler);
   app.use(errorHandler);
