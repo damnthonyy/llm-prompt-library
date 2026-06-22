@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/build
+**/.turbo
+**/coverage
+**/*.db
+**/*.db-journal
+**/.env
+**/.env.local
+.git
+*.md
+*.pdf
