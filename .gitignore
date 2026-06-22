@@ -29,6 +29,9 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 
+# Local Claude settings
+.claude/settings.local.json
+
 # Misc
 coverage/
 *.tsbuildinfo
