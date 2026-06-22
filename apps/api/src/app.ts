@@ -4,6 +4,7 @@ import cors from 'cors';
 import { env } from './env.js';
 import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
+import { promptsRouter } from './routes/prompts.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 /**
@@ -24,8 +25,7 @@ export function createApp(): Express {
 
   app.use('/health', healthRouter);
   app.use('/auth', authRouter);
-
-  // The prompts router is mounted in a later issue.
+  app.use('/prompts', promptsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
