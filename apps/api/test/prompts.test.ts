@@ -29,13 +29,11 @@ describe('prompt CRUD happy path', () => {
   });
 
   it('creates a prompt and normalizes tags', async () => {
-    const res = await agent
-      .post('/prompts')
-      .send({
-        title: 'Test prompt',
-        body: 'A body about Kubernetes',
-        tags: ['Infra', 'infra', 'devops'],
-      });
+    const res = await agent.post('/prompts').send({
+      title: 'Test prompt',
+      body: 'A body about Kubernetes',
+      tags: ['Infra', 'infra', 'devops'],
+    });
     expect(res.status).toBe(201);
     expect(res.body.title).toBe('Test prompt');
     expect(res.body.tags).toEqual(['infra', 'devops']); // lowercased + de-duped
