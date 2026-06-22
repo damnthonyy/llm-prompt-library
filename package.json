@@ -17,6 +17,9 @@
     "db:seed": "pnpm --filter @repo/api db:seed",
     "db:reset": "pnpm --filter @repo/api db:reset"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "esbuild", "prisma"]
+  },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "eslint": "^9.17.0",
